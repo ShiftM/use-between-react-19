@@ -10,6 +10,6 @@ type ReactSharedInternalsType = {
 }
 
 export const ReactSharedInternals =
-  (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED as ReactSharedInternalsType
+  (React as any)._DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE  as ReactSharedInternalsType
 
-export const ReactCurrentDispatcher = ReactSharedInternals.H
+export const ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher
