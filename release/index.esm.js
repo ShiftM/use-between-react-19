@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useReducer, useEffect, useRef } from 'react';
 
 const ReactSharedInternals = React._DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
-const ReactCurrentDispatcher = ReactSharedInternals.ReactCurrentDispatcher;
+const ReactCurrentDispatcher = ReactSharedInternals.H;
 
 const useForceUpdate = () => useReducer(() => ({}))[1];
 

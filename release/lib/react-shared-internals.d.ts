@@ -1,6 +1,6 @@
 declare type AnyHook = (...args: any[]) => any;
 declare type ReactSharedInternalsType = {
-    ReactCurrentDispatcher: {
+    H: {
         current?: {
             [name: string]: AnyHook;
         };
