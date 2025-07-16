@@ -24,7 +24,7 @@ function _interopNamespace(e) {
 
 var React__namespace = /*#__PURE__*/_interopNamespace(React);
 
-const ReactSharedInternals = React__namespace._DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+const ReactSharedInternals = React__namespace.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
 const ReactCurrentDispatcher = ReactSharedInternals.H;
 
 const useForceUpdate = () => React.useReducer(() => ({}))[1];
