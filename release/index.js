@@ -5,21 +5,21 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var React = require('react');
 
 function _interopNamespace(e) {
-  if (e && e.__esModule) return e;
-  var n = Object.create(null);
-  if (e) {
-    Object.keys(e).forEach(function (k) {
-      if (k !== 'default') {
-        var d = Object.getOwnPropertyDescriptor(e, k);
-        Object.defineProperty(n, k, d.get ? d : {
-          enumerable: true,
-          get: function () { return e[k]; }
+    if (e && e.__esModule) return e;
+    var n = Object.create(null);
+    if (e) {
+        Object.keys(e).forEach(function (k) {
+            if (k !== 'default') {
+                var d = Object.getOwnPropertyDescriptor(e, k);
+                Object.defineProperty(n, k, d.get ? d : {
+                    enumerable: true,
+                    get: function () { return e[k]; }
+                });
+            }
         });
-      }
-    });
-  }
-  n["default"] = e;
-  return Object.freeze(n);
+    }
+    n["default"] = e;
+    return Object.freeze(n);
 }
 
 var React__namespace = /*#__PURE__*/_interopNamespace(React);
@@ -142,10 +142,29 @@ const ownDisptacher = {
     },
     useRef(initialValue) {
         const box = nextBox();
+
         if (!box.initialized) {
-            box.state = { current: initialValue };
+            // Always initialize current to a fallback proxy
+            const fallback = new Proxy(
+                { current: initialValue ?? {} },
+                {
+                    get(target, prop) {
+                        if (prop === 'current') return target.current;
+                        return undefined;
+                    },
+                    set(target, prop, value) {
+                        if (prop === 'current') {
+                            target.current = value ?? {};
+                        }
+                        return true;
+                    },
+                }
+            );
+
+            box.state = fallback;
             box.initialized = true;
         }
+
         return box.state;
     },
     useImperativeHandle(ref, fn, deps) {
@@ -156,14 +175,14 @@ const ownDisptacher = {
             box.deps = deps;
             box.initialized = true;
             useLayoutEffectQueue.push([box, deps, () => {
-                    typeof ref === 'function' ? ref(fn()) : ref.current = fn();
-                }]);
+                typeof ref === 'function' ? ref(fn()) : ref.current = fn();
+            }]);
         }
         else if (shouldUpdate(box.deps, deps)) {
             box.deps = deps;
             useLayoutEffectQueue.push([box, deps, () => {
-                    typeof ref === 'function' ? ref(fn()) : ref.current = fn();
-                }]);
+                typeof ref === 'function' ? ref(fn()) : ref.current = fn();
+            }]);
         }
     }
 };

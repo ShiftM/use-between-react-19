@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useReducer, useEffect, useRef } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 
 const ReactSharedInternals = React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
 const ReactCurrentDispatcher = ReactSharedInternals.H;
@@ -119,10 +119,29 @@ const ownDisptacher = {
     },
     useRef(initialValue) {
         const box = nextBox();
+
         if (!box.initialized) {
-            box.state = { current: initialValue };
+            // Always initialize current to a fallback proxy
+            const fallback = new Proxy(
+                { current: initialValue ?? {} },
+                {
+                    get(target, prop) {
+                        if (prop === 'current') return target.current;
+                        return undefined;
+                    },
+                    set(target, prop, value) {
+                        if (prop === 'current') {
+                            target.current = value ?? {};
+                        }
+                        return true;
+                    },
+                }
+            );
+
+            box.state = fallback;
             box.initialized = true;
         }
+
         return box.state;
     },
     useImperativeHandle(ref, fn, deps) {
@@ -133,14 +152,14 @@ const ownDisptacher = {
             box.deps = deps;
             box.initialized = true;
             useLayoutEffectQueue.push([box, deps, () => {
-                    typeof ref === 'function' ? ref(fn()) : ref.current = fn();
-                }]);
+                typeof ref === 'function' ? ref(fn()) : ref.current = fn();
+            }]);
         }
         else if (shouldUpdate(box.deps, deps)) {
             box.deps = deps;
             useLayoutEffectQueue.push([box, deps, () => {
-                    typeof ref === 'function' ? ref(fn()) : ref.current = fn();
-                }]);
+                typeof ref === 'function' ? ref(fn()) : ref.current = fn();
+            }]);
         }
     }
 };
