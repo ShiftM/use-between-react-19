@@ -32,20 +32,35 @@ const ownDisptacher = {
     useState(initialState) {
         const box = nextBox();
         const tick = nextTick;
+    
         if (!box.initialized) {
-            box.state = typeof initialState === "function" ? initialState() : initialState;
-            box.set = (fn) => {
-                if (typeof fn === 'function') {
-                    return box.set(fn(box.state));
-                }
-                if (!equals(fn, box.state)) {
-                    box.state = fn;
+            const safeState = typeof initialState === "function" ? initialState() : initialState;
+    
+            // Fallback for undefined initialState
+            box.state = safeState ?? {}; // Change to [] if you're expecting an array
+    
+            box.set = (fnOrValue) => {
+                const nextValue = typeof fnOrValue === "function" ? fnOrValue(box.state) : fnOrValue;
+                if (!equals(nextValue, box.state)) {
+                    box.state = nextValue;
                     tick();
                 }
             };
+    
             box.initialized = true;
         }
-        return [box.state, box.set];
+    
+        // Always return stable Proxy for destructuring safety
+        return new Proxy([box.state, box.set], {
+            get(_, prop) {
+                if (prop === 0) return box.state;
+                if (prop === 1) return box.set;
+                return undefined;
+            },
+            set() {
+                return false;
+            }
+        });
     },
     useReducer(reducer, initialState, init) {
         const box = nextBox();
